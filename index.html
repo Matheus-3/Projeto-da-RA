@@ -1,0 +1,121 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    #example-scanning-overlay {
+      display: flex; align-items: center; justify-content: center;
+      position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+      background: transparent; z-index: 2;
+    }
+    .inner { position: relative; display: flex; align-items: center; justify-content: center; }
+    .scanline {
+      position: absolute; width: 100%; height: 10px; background: #fff;
+      animation: move 2s linear infinite;
+    }
+    @keyframes move { 0%,100%{top:0} 50%{top:calc(100% - 10px)} }
+
+    /* Fade suave */
+    .hidden { opacity: 0; transition: opacity 1s; }
+    .visible { opacity: 1; transition: opacity 1s; }
+  </style>
+</head>
+
+<body>
+  <!-- Overlay de Scaneamento -->
+  <div id="example-scanning-overlay">
+    <div class="inner">
+      <img src="./foto1.jpg" style="width:40%;opacity:0.5;">
+      <div class="scanline"></div>
+    </div>
+  </div>
+
+  <!-- Cena AR -->
+  <a-scene mindar-image="uiScanning: #example-scanning-overlay; imageTargetSrc: ./targets1.mind"
+           color-space="sRGB"
+           renderer="colorManagement: true, physicallyCorrectLights"
+           vr-mode-ui="enabled: false"
+           device-orientation-permission-ui="enabled: false"> 
+
+    <a-assets>
+      <a-asset-item id="model1" src="./african_girl.glb"></a-asset-item>
+      <a-asset-item id="model2" src="./2017_chevrolet_camaro_ss.glb"></a-asset-item>
+      <a-asset-item id="model3" src="./curly-haired woman 3d model.glb"></a-asset-item>
+    </a-assets>
+
+    <a-camera look-controls="enabled: false"></a-camera>
+
+    <!-- Alvo AR -->
+    <a-entity mindar-image-target="targetIndex: 0">
+
+      <!-- Container dos modelos -->
+      <a-entity id="object-container">
+
+        <!-- OBJETO 1 -->
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 0" scale="0.0005 0.0005 0.0005" src="#model1"
+          animation="property: position; to: 0 0.1 0.1; dur: 5000; easing: easeInOutQuad; loop: true; dir: alternate"
+        ></a-gltf-model>
+
+        <!-- OBJETO 2 -->
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 0" scale="0.10 0.10 0.10" src="#model2"
+          animation="property: position; to: 0 0.1 0.1; dur: 5000; easing: easeInOutQuad; loop: true; dir: alternate"
+        ></a-gltf-model>
+
+        <!-- OBJETO 3 -->
+        <a-gltf-model class="hidden"
+          visible="false"
+          rotation="90 0 0" position="0 0 -4" scale="0.70 0.70 0.70" src="#model3"
+          animation="property: position; to: 0 0.1 0.1; dur: 4000; easing: easeInOutQuad; loop: false; dir: alternate"
+        ></a-gltf-model>
+
+      </a-entity>
+
+    </a-entity>
+  </a-scene>
+
+
+  <!-- Script para alternar modelos -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const models = document.querySelectorAll("#object-container a-gltf-model");
+      let current = 0;
+
+      // Inicializa: só o primeiro aparece
+      models.forEach((m, i) => {
+        if (i === 0) {
+          m.setAttribute("visible", true);
+          m.classList.remove("hidden");
+          m.classList.add("visible");
+        } else {
+          m.setAttribute("visible", false);
+          m.classList.add("hidden");
+        }
+      });
+
+      function switchModel() {
+        // Esconde o atual
+        models[current].classList.remove("visible");
+        models[current].classList.add("hidden");
+        models[current].setAttribute("visible", false);
+
+        // Próximo
+        current = (current + 1) % models.length;
+
+        // Mostra o novo
+        models[current].setAttribute("visible", true);
+        models[current].classList.remove("hidden");
+        models[current].classList.add("visible");
+      }
+
+      setInterval(switchModel, 4000);
+    });
+  </script>
+
+</body>
+</html>
